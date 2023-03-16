@@ -5,16 +5,18 @@ import { isEmpty, size } from 'lodash'
 import { Image, Input, Button, Icon } from '@rneui/base'
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { validateEmail } from '../../kernel/validations'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import Loading from '../../kernel/components/Loading'
 
-export default function CreateUser() {
+export default function CreateUser(props) {
+    const { navigation } = props
     const payLoad = {
         email: '',
         password: '',
         repeatPassword: ''
     }
-    const auth = getAuth();
+    const auth = getAuth()
     const [show, setShow] = useState(false)
     const [error, setError] = useState(payLoad)
     const [data, setData] = useState(payLoad)
@@ -24,25 +26,59 @@ export default function CreateUser() {
         setData({ ...data, [type]: e.nativeEvent.text })
     }
     const createUser = () => {
-        //console.log('CreateUser 24 -> data',data);
-        if (!(isEmpty(data.email) || isEmpty(data.password))) {
+        console.log('CreateUser 24 -> data', data);
+        if (!(isEmpty(data.email || isEmpty(data.password)))) {
             if (validateEmail(data.email)) {
-                if (size(data.password) >= 6) {
+                if ((size(data.password)) >= 6) {
                     if (data.password == data.repeatPassword) {
+                        setShow(true)
                         setError(payLoad)
                         console.log('Listo para el registro');
+                        createUserWithEmailAndPassword(auth, data.email, data.password)
+                            .then(async (userCredential) => {
+                                const user = userCredential.user;
+                                try {
+                                    await AsyncStorage.setItem('@session', JSON.stringify(user))
+                                } catch (e) {
+                                    console.error("Error -> createUser Storage", e);
+                                }
+                                console.log("Created User", user);
+                                setShow(false)
+                                navigation.navigate("profileStack")
+                            })
+                            .catch((error) => {
+                                setError({ email: '', password: 'Usuario o contraseña incorrectos' })
+                                setShow(false)
+                                const errorCode = error.code;
+                                const errorMessage = error.message;
+                            });
                     } else {
-                        setError({ email: '', password: 'Debe coincidir con repetir contraseña', repeatPassword: 'Debe coincidir con repetir contraseña' })
+                        setError({
+                            email: '',
+                            password: 'Debe coincidir con repetir contraseña',
+                            repeatPassword: 'Debe coincidir con contraseña'
+                        })
                     }
                 } else {
-                    setError({ email: '', password: 'Se require una contraseña de por lo menos 6 caracteres', repeatPassword: 'Se require una contraseña de por lo menos 6 caracteres' })
+                    setError({
+                        email: '',
+                        password: 'Logitud de por lo menos 6 carácteres',
+                        repeatPassword: 'Logitud de por lo menos 6 carácteres'
+                    })
                 }
             } else {
-                setError({ email: 'Debe ser un email valido', password: '', repeatPassword: '' })
+                setError({
+                    email: 'Debe ser un correo electrónico válido',
+                    password: '',
+                    repeatPassword: ''
+                })
             }
-
         } else {
-            setError({ email: 'Campo obligatorio', password: 'Campo obligatorio', repeatPassword: 'Campo obligatorio' })
+            setError({
+                email: 'Campo obligatorio',
+                password: 'Campo obligatorio',
+                repeatPassword: 'Campo obligatorio'
+            })
         }
     }
     return (

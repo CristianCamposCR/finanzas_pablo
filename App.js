@@ -1,6 +1,10 @@
 import { StyleSheet} from 'react-native';
 import Navigation from './config/navigation/Navigation';
 import { app } from './config/utils/firebase';
+//evitar mensajes de error y consola para el usuario
+import { LogBox } from 'react-native';
+LogBox.ignoreAllLogs(true);
+
 
 export default function App() {
   return (

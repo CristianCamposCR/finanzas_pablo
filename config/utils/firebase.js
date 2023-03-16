@@ -1,17 +1,16 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { initializeAuth, getReactNativePersistence } from "firebase/auth/react-native";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyCKlXbAL7XJ0RcF0qCRzL3S9DAQQp0mvFw",
-    authDomain: "finanzas-cab04.firebaseapp.com",
-    projectId: "finanzas-cab04",
-    storageBucket: "finanzas-cab04.appspot.com",
-    messagingSenderId: "302188883059",
-    appId: "1:302188883059:web:1e35b2c9eaa1e02575ce06"
-};
-
+    apiKey: "AIzaSyAw5FnKeRghx_EMK9pAwULN8rXkMIITM6U",
+    authDomain: "finanzas-8fc31.firebaseapp.com",
+    projectId: "finanzas-8fc31",
+    storageBucket: "finanzas-8fc31.appspot.com",
+    messagingSenderId: "844955091602",
+    appId: "1:844955091602:web:ab82dffe77737073fb5c4b"
+  };
+  
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+export const auth = initializeAuth(app, {persistence: getReactNativePersistence(AsyncStorage)})
