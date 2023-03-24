@@ -1,38 +1,45 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
 import { Button, Avatar } from '@rneui/base'
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-import Loading from '../../../../kernel/components/Loading';
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-//import { getAuth, updateProfile } from "firebase/auth";
+import React, { useEffect, useState } from 'react'
+// import AsyncStorage from '@react-native-async-storage/async-storage'
+import Loading from '../../../../kernel/components/Loading'
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"
+import { getAuth, updateProfile } from 'firebase/auth'
 import * as ImagePicker from 'expo-image-picker'
-import * as Permissions from 'expo-permissions'
-//import {} from "firebase/firestore"
+import * as MediaLibrary from 'expo-media-library';
 // import { doc, setDoc, getFirestore } from "firebase/firestore";
-import { getAuth, updateProfile } from 'firebase/auth';
-import AccountOptions from './AccountOptions';
-
+import AccountOptions from './AccountOptions'
+import { get } from 'lodash'
 
 export default function UserLogged(props) {
-    const auth = getAuth();
-    const { user } = props;
-    // const { setReload, user } = props;
-    const [show, setShow] = useState(false, "")
+    const [auth, setAuth] = useState(getAuth())
+    const [reload, setReload] = useState(false)
+    useEffect(()=>{
+        setAuth(getAuth())
+        console.log('ejecuta el effect')
+        setReload(false)
+    },[reload])
+    // const { setReload, user } = props
+    // console.log('currentUser', auth.currentUser);
+    const { user } = props
+    // console.log('Sesión', user);
+    const [show, setShow] = useState(false)
     const [text, setText] = useState('')
-
     // const removeValue = async () => {
+    //     setText('Cerrando sesión')
     //     try {
     //         setShow(true)
     //         await AsyncStorage.removeItem('@session')
     //         setShow(false)
     //         setReload(true)
     //     } catch (e) {
-
+    //         setShow(false)
+    //         console.log('Error - UserLogged(12)', e);
     //     }
-    // };
+    // }
 
     const uploadImage = async (uri) => {
-        setText('Subiendo imagen')
+        setText('Cambiando avatar')
         setShow(true)
         const response = await fetch(uri) //genera un blob
         console.log('Uri response', response);
@@ -42,11 +49,9 @@ export default function UserLogged(props) {
         return uploadBytes(storageRef, _bodyBlob)
     }
 
-
-
     const changeAvatar = async () => {
-        const resultPermission = await Permissions.askAsync(Permissions.CAMERA)
-        if (resultPermission.permissions.camera.status !== 'denied') {
+        const {status} = await MediaLibrary.requestPermissionsAsync()
+        if (status !== 'denied') {
             let result = await ImagePicker.launchImageLibraryAsync({
                 mediaTypes: ImagePicker.MediaTypeOptions.Images,
                 allowsEditing: true,
@@ -55,9 +60,9 @@ export default function UserLogged(props) {
             if (!result.canceled) {
                 uploadImage(result.assets[0].uri).then((response) => {
                     console.log('Imagen actualizada')
-                    uploadPhotoProfile();
+                    uploadPhotoProfile()
                 }).catch((err) => {
-                    console.log('Error - UserLogged', err)
+                    console.log('Error', err)
                 })
             } else {
                 console.log('Imagen no seleccionada');
@@ -67,20 +72,22 @@ export default function UserLogged(props) {
     }
 
     const uploadPhotoProfile = () => {
-        const storage = getStorage();
+        const storage = getStorage()
         getDownloadURL(ref(storage, `avatar/${user.uid}`))
             .then((url) => {
-                updateProfile(auth.currentUser, { photoURL: url })
+                updateProfile(auth.currentUser, {
+                    photoURL: url
+                })
                     .then(() => {
-                        setShow(false);
+                        setShow(false)
                     })
                     .catch((err) => {
-                        setShow(false);
-                        console.log("fallo", err);
+                        setShow(false)
+                        console.log('Fallo', err);
                     })
             }).catch((err) => {
-                setShow(false);
-                console.log("error al obtener la imagen", err);
+                setShow(false)
+                console.log('Error obtener Imagen', err);
             })
     }
 
@@ -88,73 +95,65 @@ export default function UserLogged(props) {
         <View style={styles.container}>
             {user && (
                 <View style={styles.infoContainer}>
-                    {user.photoURL ? (<Avatar
-                        size={"xlarge"}
+                    <Avatar
+                        size='xlarge'
                         rounded
                         source={{ uri: `${auth.currentUser.photoURL}` }}
                         containerStyle={styles.avatar}
                     >
                         <Avatar.Accessory
-                            size={35}
+                            size={50}
                             onPress={changeAvatar}
                         />
-                    </Avatar>) :
-                        (<Avatar
-                            size={"xlarge"}
-                            rounded
-                            title={user.email.charAt(0).toUpperCase().concat(user.email.charAt(1).toUpperCase())}
-                            containerStyle={styles.avatarChar}
-                        >
-                            <Avatar.Accessory
-                                size={22}
-                                onPress={changeAvatar}
-                            />
-                        </Avatar>)
-                    }
-
-
-
+                    </Avatar>
                     <View>
-                        <Text style={styles.displayName} > {user.providerData[0].displayName ? user.providerData[0].displayName : "Anónimo"} </Text>
-                        <Text > {user.providerData[0].email} </Text>
-
+                        <Text style={styles.displayName}>
+                            {auth.currentUser.displayName ? auth.currentUser.displayName : 'Anónimo'}
+                        </Text>
+                        <Text>
+                            {auth.currentUser.email}
+                        </Text>
                     </View>
                 </View>
             )}
-            <AccountOptions/>
+            <AccountOptions setReload={setReload}/>
             <View style={styles.btnContainer}>
                 <Button
-                    title="cerrar sesion"
+                    title='Cerrar sesión'
                     buttonStyle={styles.btn}
                     onPress={() => {
                         setText('Cerrando sesión')
-                        setShow(true)
                         return auth.signOut()
                     }}
                 />
             </View>
-
             <Loading show={show} text={text} />
         </View>
     )
 }
+
 const styles = StyleSheet.create({
     container: {
-        minHeight: "100%",
-        backgroundColor: "#FFF"
+        minHeight: '100%',
+        backgroundColor: '#FFF'
+    },
+    btnContainer: {
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     btn: {
         marginTop: 30,
-        borderRadius: 10,
-        backgroundColor: "tomato",
+        backgroundColor: 'tomato',
         paddingVertical: 10,
+        marginHorizontal: 20,
+        borderRadius: 10,
         width: 250
     },
     infoContainer: {
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
-        paddingVertical: 30,
+        paddingVertical: 30
     },
     avatar: {
         marginRight: 16
@@ -162,13 +161,5 @@ const styles = StyleSheet.create({
     displayName: {
         fontWeight: 'bold',
         paddingBottom: 5
-    },
-    btnContainer: {
-        justifyContent: "center",
-        alignItems: "center"
-    },
-    avatarChar: {
-        marginRight: 16,
-        backgroundColor: "purple"
     },
 })

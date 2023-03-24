@@ -8,6 +8,7 @@ import { validateEmail } from '../../kernel/validations'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import Loading from '../../kernel/components/Loading'
+import Alert from '../../kernel/components/Alert'
 
 export default function CreateUser(props) {
     const { navigation } = props
@@ -22,6 +23,10 @@ export default function CreateUser(props) {
     const [data, setData] = useState(payLoad)
     const [showPassword, setShowPassword] = useState(true)
     const [showRepeatPassword, setShowRepeatPassword] = useState(true)
+    const [showAlert, setShowAlert] = useState(false)
+    const [alertText, setAlertText] = useState('')
+    const [alertType, setAlertType] = useState('')
+    
     const changePayLoad = (e, type) => {
         setData({ ...data, [type]: e.nativeEvent.text })
     }
@@ -41,14 +46,23 @@ export default function CreateUser(props) {
                                     await AsyncStorage.setItem('@session', JSON.stringify(user))
                                 } catch (e) {
                                     console.error("Error -> createUser Storage", e);
+                                    // setShowAlert(true)
+                                    // setAlertText('No se pudo crear al usuario')
+                                    // setAlertType('error')
                                 }
                                 console.log("Created User", user);
                                 setShow(false)
+                                // setShowAlert(true)
+                                // setAlertText('Usuario creado')
+                                // setAlertType('succes')
                                 navigation.navigate("profileStack")
                             })
                             .catch((error) => {
-                                setError({ email: '', password: 'Usuario o contraseña incorrectos' })
+                                setError({ email: '', password: 'No se pudo crear el usuario' })
                                 setShow(false)
+                                // setShowAlert(true)
+                                // setAlertText('No se pudo crear al usuario')
+                                // setAlertType('error')
                                 const errorCode = error.code;
                                 const errorMessage = error.message;
                             });
@@ -140,6 +154,7 @@ export default function CreateUser(props) {
                 </View>
             </View>
             <Loading show={show} text='Registrando' />
+            <Alert show={showAlert} text={alertText} type={alertType}/>
         </KeyboardAwareScrollView>
     )
 }

@@ -1,56 +1,58 @@
-import { StyleSheet, Text, View } from 'react-native'
-import React, { useState } from 'react'
-import { ListItem,Icon } from '@rneui/base'
+import { StyleSheet, View } from 'react-native'
 import { map } from 'lodash'
+import React, { useState } from 'react'
 import Modal from '../../../../kernel/components/Modal'
 import ChangeAddress from './components/ChangeAddress'
 import ChangePassword from './components/ChangePassword'
 import ChangeDisplayName from './components/ChangeDisplayName'
+import { ListItem, Icon } from '@rneui/base'
 
 export default function AccountOptions(props) {
-    const { userInfo } = props;
-    const [showModal, setShowModal] = useState(false);
-    const [renderComponent, setRenderComponent] = useState(null);
+    const { userInfo } = props
+    const { setReload } = props
+    const [showModal, setShowModal] = useState(false)
+    const [renderComponent, setRenderComponent] = useState(null)
+
     const selectComponent = (key) => {
         switch (key) {
             case 'displayName':
-                setRenderComponent(<ChangeDisplayName/>)
-                setShowModal(true);
+                setRenderComponent(<ChangeDisplayName setReload={setReload}/>)
+                setShowModal(true)
                 break;
             case 'password':
-                setRenderComponent(<ChangePassword/>)
-                setShowModal(true);
+                setRenderComponent(<ChangePassword setReload={setReload}/>)
+                setShowModal(true)
                 break;
             case 'address':
-                setRenderComponent(<ChangeAddress/>)
-                setShowModal(true);
-
+                setRenderComponent(<ChangeAddress setShowModal={setShowModal} />)
+                setShowModal(true)
                 break;
             default:
-                setRenderComponent(null);
-                setShowModal(false);
+                setRenderComponent(null)
+                setShow(false)
                 break;
         }
     }
-    const menuOption = generateOptions(selectComponent);
+
+    const menuOption = generateOptions(selectComponent)
 
     return (
         <View>
-            {map(menuOption, (menu,index) =>(
-               <ListItem containerStyle={styles.menuOption} key={index} onPress={menu.onPress}>
-                <Icon
-                    name={menu.iconLeft}
-                    type={menu.iconType}
-                    color={menu.iconLeftColor}
-                />
-                <ListItem.Content>
-                    <ListItem.Title>{menu.title}</ListItem.Title>
-                </ListItem.Content>
-                <ListItem.Chevron/>
-               </ListItem>
+            {map(menuOption, (option, index) => (
+                <ListItem containerStyle={styles.menuOption} key={index} onPress={option.onPress}>
+                    <Icon
+                        name={option.iconNameLeft}
+                        type={option.iconType}
+                        color={option.iconColorLeft}
+                    />
+                    <ListItem.Content>
+                        <ListItem.Title>{option.title}</ListItem.Title>
+                    </ListItem.Content>
+                    <ListItem.Chevron />
+                </ListItem>
             ))}
             {renderComponent && (
-                <Modal show={showModal} setShow={setShowModal} >
+                <Modal show={showModal} setShow={setShowModal}>
                     {renderComponent}
                 </Modal>
             )}
@@ -62,7 +64,7 @@ const styles = StyleSheet.create({
     menuOption: {
         borderBottomWidth: 1,
         borderBottomColor: '#E3E3E3'
-    }
+    },
 })
 
 const generateOptions = (selectComponent) => {
@@ -70,29 +72,23 @@ const generateOptions = (selectComponent) => {
         {
             title: 'Actualizar nombre completo',
             iconType: 'material-community',
-            iconLeft: 'account-circle',
-            iconLeftColor: 'tomato',
-            iconNameRight: 'chevron-rigth',
-            iconColorRight: '#CCC',
-            onPress: () => selectComponent("displayName")
+            iconNameLeft: 'account-circle',
+            iconColorLeft: 'tomato',
+            onPress: () => selectComponent('displayName')
         },
         {
             title: 'Actualizar contraseña',
             iconType: 'material-community',
-            iconLeft: 'lock-reset',
-            iconLeftColor: 'tomato',
-            iconNameRight: 'chevron-rigth',
-            iconColorRight: '#CCC',
-            onPress: () => selectComponent("password")
+            iconNameLeft: 'lock-reset',
+            iconColorLeft: 'tomato',
+            onPress: () => selectComponent('password')
         },
         {
             title: 'Actualizar ubicación',
             iconType: 'material-community',
-            iconLeft: 'map-marker-radius',
-            iconLeftColor: 'tomato',
-            iconNameRight: 'chevron-rigth',
-            iconColorRight: '#CCC',
-            onPress: () => selectComponent("address")
-        }
+            iconNameLeft: 'map-marker',
+            iconColorLeft: 'tomato',
+            onPress: () => selectComponent('address')
+        },
     ]
 }
