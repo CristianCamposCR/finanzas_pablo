@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "844955091602",
+    "project_id": "finanzas-8fc31",
+    "storage_bucket": "finanzas-8fc31.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:844955091602:android:5db6edcd45429dacfb5c4b",
+        "android_client_info": {
+          "package_name": "com.cristian.finanzas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "844955091602-q3hou7itpiof9fe16vj1cd9f24buh778.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCxUt5UnVM0CeVtWI7n_lby0End8zK0i68"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "844955091602-q3hou7itpiof9fe16vj1cd9f24buh778.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
